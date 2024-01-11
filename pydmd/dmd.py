@@ -5,6 +5,9 @@ Derived module from dmdbase.py for classic dmd.
 import numpy as np
 from scipy.linalg import pinv
 
+from typing import Optional, Union, Iterable,Any
+from numpy.typing import NDArray
+
 from .dmdbase import DMDBase
 from .snapshots import Snapshots
 from .utils import compute_tlsq
@@ -46,7 +49,7 @@ class DMD(DMDBase):
     :type tikhonov_regularization: int or float
     """
 
-    def fit(self, X, Y=None):
+    def fit(self, X:Union[NDArray[Any],Iterable], Y:Optional[Union[Iterable,NDArray[Any]]]=None):
         """
         Compute the Dynamic Modes Decomposition to the input data.
 
