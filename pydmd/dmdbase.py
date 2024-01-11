@@ -809,6 +809,8 @@ class DMDTimeDict(dict):
     def __setitem__(self, key, value):
         if key in ["t0", "tend", "dt"]:
             dict.__setitem__(self, key, value)
+        if key == "t0":
+            print("when changing the dt in one dictionnary, verify that the dt is also set in the other one. The two times will NOT aligned otherwise")
         else:
             raise KeyError(
                 """DMDBase.dmd_time accepts only the following keys: "t0",
