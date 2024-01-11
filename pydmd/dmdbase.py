@@ -181,7 +181,7 @@ class DMDBase:
             method uses the argument for the truncation; if float between 0 and 1,
             the rank is the number of the biggest singular values that are needed
             to reach the 'energy' specified by `svd_rank`; if -1, the method does
-            not compute truncation. YOURE FREAKING USELESS VSCODEs
+            not compute truncation
         :param int tlsq_rank: rank truncation computing Total Least Square. Default
             is 0, that means no truncation.
         :param bool exact: flag to compute either exact DMD or projected DMD.
@@ -809,8 +809,6 @@ class DMDTimeDict(dict):
     def __setitem__(self, key, value):
         if key in ["t0", "tend", "dt"]:
             dict.__setitem__(self, key, value)
-        if key == "t0":
-            print("when changing the dt in one dictionnary, verify that the dt is also set in the other one. The two times will NOT aligned otherwise")
         else:
             raise KeyError(
                 """DMDBase.dmd_time accepts only the following keys: "t0",
@@ -818,6 +816,9 @@ class DMDTimeDict(dict):
                     key
                 )
             )
+        # warning
+        if key == "t0":
+            print("when changing the dt in one dictionnary, verify that the dt is also set in the other one. The two times will NOT aligned otherwise")
 
     def __eq__(self, o):
         if isinstance(o, dict):
