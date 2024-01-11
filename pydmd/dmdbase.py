@@ -162,6 +162,7 @@ class DMDBase:
             - `dt` is the delta time between the approximated solutions.
 
     """
+    # feels like the dictionnaries for times could be better done using mutable range if that's possible to construct in python
 
     def __init__(
         self,
@@ -600,13 +601,9 @@ class DMDBase:
 
         Inside the dictionary:
 
-        ======  ====================================================================================
-        Key     Value
-        ======  ====================================================================================
-        `t0`    Time of the first input snapshot (0 by default).
-        `tend`  Time of the last input snapshot (usually corresponds to the number of snapshots).
-        `dt`    Timestep between two snapshots (1 by default).
-        ======  ====================================================================================
+        - `t0`    Time of the first input snapshot (0 by default).
+        - `tend`  Time of the last input snapshot (usually corresponds to the number of snapshots).
+        - `dt`    Timestep between two snapshots (1 by default).
 
         :return: A dict which contains info about the input time frame.
         :rtype: dict
@@ -806,6 +803,9 @@ _set_initial_time_dictionary() has not been called, did you call fit()?"""
 
 
 class DMDTimeDict(dict):
+    # no type verification. VERY easy to make it crash by inputting non number data 
+    # also not completion friendly at least on vscode
+    # Also the dictionnaries are NOT linked in any way so that changing one without the other results in spectacularly wrong results
     def __setitem__(self, key, value):
         if key in ["t0", "tend", "dt"]:
             dict.__setitem__(self, key, value)

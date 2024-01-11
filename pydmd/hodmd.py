@@ -98,7 +98,7 @@ class HODMD(HankelDMD):
         Compute the Dynamic Modes Decomposition to the input data.
 
         :param X: the input snapshots.
-        :type X: numpy.ndarray or iterable
+        :type X: numpy.ndarray of shape `n_features x n_obs` or iterable (List of arrays)        
         """
         snapshots_holder = Snapshots(X)
 

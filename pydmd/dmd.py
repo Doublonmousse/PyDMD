@@ -53,9 +53,9 @@ class DMD(DMDBase):
         """
         Compute the Dynamic Modes Decomposition to the input data.
 
-        :param X: the input snapshots.
+        :param X: the input snapshots (shape `n_features x n_obs` or iterable)
         :type X: numpy.ndarray (of shape `n_features x n_obs`) or iterable (list of arrays)
-        :param Y: additional input snapshots such that Y=AX.
+        :param Y: additional input snapshots such that Y=AX. (`n_features x n_obs` or iterable)
             If not provided, snapshots from X are used.
         :type Y: numpy.ndarray (of shape `n_features x n_obs`) or iterable (list of arrays)
         """
