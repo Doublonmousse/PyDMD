@@ -137,7 +137,7 @@ class DMDBase:
     :type rescale_mode: {'auto'} or None or numpy.ndarray
     :param bool forward_backward: If True, the low-rank operator is computed
         like in fbDMD (reference: https://arxiv.org/abs/1507.02264). Default is
-        False.
+        False.s
     :param sorted_eigs: Sort eigenvalues (and modes/dynamics accordingly) by
         magnitude if `sorted_eigs='abs'`, by real part (and then by imaginary
         part to break ties) if `sorted_eigs='real'`. Default: False.
@@ -174,6 +174,61 @@ class DMDBase:
         sorted_eigs=False,
         tikhonov_regularization=None,
     ):
+        """
+        :param svd_rank: the rank for the truncation; If 0, the method computes the
+            optimal rank and uses it for truncation; if positive interger, the
+            method uses the argument for the truncation; if float between 0 and 1,
+            the rank is the number of the biggest singular values that are needed
+            to reach the 'energy' specified by `svd_rank`; if -1, the method does
+            not compute truncation. YOURE FREAKING USELESS VSCODEs
+        :param int tlsq_rank: rank truncation computing Total Least Square. Default
+            is 0, that means no truncation.
+        :param bool exact: flag to compute either exact DMD or projected DMD.
+            Default is False.
+        :param opt: If True, amplitudes are computed like in optimized DMD  (see
+            :func:`~dmdbase.DMDBase._compute_amplitudes` for reference). If
+            False, amplitudes are computed following the standard algorithm. If
+            `opt` is an integer, it is used as the (temporal) index of the snapshot
+            used to compute DMD modes amplitudes (following the standard
+            algorithm).
+            The reconstruction will generally be better in time instants near the
+            chosen snapshot; however increasing `opt` may lead to wrong results
+            when the system presents small eigenvalues. For this reason a manual
+            selection of the number of eigenvalues considered for the analyisis may
+            be needed (check `svd_rank`). Also setting `svd_rank` to a value
+            between 0 and 1 may give better results. Default is False.
+        :type opt: bool or int
+        :param rescale_mode: Scale Atilde as shown in
+                10.1016/j.jneumeth.2015.10.010 (section 2.4) before computing its
+                eigendecomposition. None means no rescaling, 'auto' means automatic
+                rescaling using singular values, otherwise the scaling factors.
+        :type rescale_mode: {'auto'} or None or numpy.ndarray
+        :param bool forward_backward: If True, the low-rank operator is computed
+            like in fbDMD (reference: https://arxiv.org/abs/1507.02264). Default is
+            False.
+        :param sorted_eigs: Sort eigenvalues (and modes/dynamics accordingly) by
+            magnitude if `sorted_eigs='abs'`, by real part (and then by imaginary
+            part to break ties) if `sorted_eigs='real'`. Default: False.
+        :type sorted_eigs: {'real', 'abs'} or False
+        :param tikhonov_regularization: Tikhonov parameter for the regularization.
+            If `None`, no regularization is applied, if `float`, it is used as the
+            :math:`\\lambda` tikhonov parameter.
+        :type tikhonov_regularization: int or float
+
+        :cvar dict original_time: dictionary that contains information about the
+            time window where the system is sampled:
+
+            - `t0` is the time of the first input snapshot;
+            - `tend` is the time of the last input snapshot;
+            - `dt` is the delta time between the snapshots.
+
+        :cvar dict dmd_time: dictionary that contains information about the time
+            window where the system is reconstructed:
+
+                - `t0` is the time of the first approximated solution;
+                - `tend` is the time of the last approximated solution;
+                - `dt` is the delta time between the approximated solutions.
+        """
         self._Atilde = DMDOperator(
             svd_rank=svd_rank,
             exact=exact,
@@ -215,7 +270,7 @@ class DMDBase:
         Get the timesteps of the original snapshot.
 
         :return: the time intervals of the original snapshots.
-        :rtype: numpy.ndarray
+        :rtype: numpy.ndarray `(n_timesteps)`
         """
         return np.arange(
             self.original_time["t0"],
@@ -226,10 +281,10 @@ class DMDBase:
     @property
     def modes(self):
         """
-        Get the matrix containing the DMD modes, stored by column.
+        Get the matrix containing the DMD modes, stored by column (and flattened if need be)
 
         :return: the matrix containing the DMD modes.
-        :rtype: numpy.ndarray
+        :rtype: numpy.ndarray `n_features x n_modes` 
         """
         if self.fitted:
             if not self._modes_activation_bitmask_proxy:
@@ -280,8 +335,8 @@ class DMDBase:
             \\lambda_{k} \\right)^{\\left( t / \\Delta t \\right)} b_{k}
 
         :return: the matrix that contains all the time evolution, stored by
-            row.
-        :rtype: numpy.ndarray
+            row. 
+        :rtype: numpy.ndarray `n_modes x n_timesteps`
         """
         temp = np.repeat(
             self.eigs[:, None], self.dmd_timesteps.shape[0], axis=1
@@ -325,10 +380,10 @@ class DMDBase:
     @property
     def reconstructed_data(self):
         """
-        Get the reconstructed data.
+        Get the reconstructed data, flattened if need be.
 
         :return: the matrix that contains the reconstructed snapshots.
-        :rtype: numpy.ndarray
+        :rtype: numpy.ndarray `n_features x n_timesteps`
         """
         return self.modes.dot(self.dynamics)
 
@@ -571,14 +626,9 @@ _set_initial_time_dictionary() has not been called, did you call fit()?"""
         to :func:`original_time`.
 
         Inside the dictionary:
-
-        ======  ====================================================================================
-        Key     Value
-        ======  ====================================================================================
-        `t0`    Time of the first output snapshot.
-        `tend`  Time of the last output snapshot.
-        `dt`    Timestep between two snapshots.
-        ======  ====================================================================================
+        - `t0`    Time of the first output snapshot.
+        - `tend`  Time of the last output snapshot.
+        - `dt`    Timestep between two snapshots.
 
         :return: A dict which contains info about the input time frame.
         :rtype: dict

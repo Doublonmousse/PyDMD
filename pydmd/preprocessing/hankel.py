@@ -21,10 +21,16 @@ def hankel_preprocessing(
 ):
     """
     Hankel pre-processing.
+    In practice, lift the matrice using d delay (matrix of the form `d*n_features x n_obs`),
+    then DMD is applied before reconstructing the dataset with the method described in `reconstruction_method`: 
 
     :param dmd: DMD instance to be wrapped.
     :param d: Hankel matrix rank
-    :param reconstruction_method: Reconstruction method.
+    :param reconstruction_method: Reconstruction method. 
+        Either using the first lines using "first" or a variation of a "mean" as the same el technically can 
+        be there multiple times with the delays in the reconstruction
+        
+    Seems like this could be an enum for the choice of method + an optional iterable with a pattern match and error catching
     """
     return PrePostProcessingDMD(
         dmd,
